@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu as MenuIcon, X as CloseIcon } from "lucide-react";
@@ -25,25 +25,24 @@ const menuItems = [
       { icon: "/announcement.png", label: "Announcements", href: "/list/announcements", visible: ["admin", "teacher", "student", "parent"] },
     ],
   },
-  {
-    title: "OTHER",
-    items: [
-      { icon: "/profile.png", label: "Profile", href: "/profile", visible: ["admin", "teacher", "student", "parent"] },
-      { icon: "/setting.png", label: "Settings", href: "/settings", visible: ["admin", "teacher", "student", "parent"] },
-      { icon: "/logout.png", label: "Logout", href: "/logout", visible: ["admin", "teacher", "student", "parent"] },
-    ],
-  },
 ];
 
 const Menu = () => {
-  const role = "admin"; // dynamic later
+  const role = "admin";
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <>
-      {/* Toggle button for mobile */}
+      {/* Mobile Toggle Button */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 bg-amber-300 p-2 rounded-md shadow-md hover:bg-amber-400 transition"
+        className="lg:hidden fixed top-4 left-4 z-50 bg-gray-200 p-2 rounded-md shadow-md hover:bg-gray-300 transition"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <CloseIcon size={22} className="text-gray-800" /> : <MenuIcon size={22} className="text-gray-800" />}
@@ -51,21 +50,38 @@ const Menu = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static top-0 left-0 h-full bg-amber-100 flex flex-col gap-6 z-40 transition-all duration-300 
-        ${isOpen ? "w-52 p-4" : "w-16 p-2"} lg:w-60 lg:p-6 lg:border-r lg:border-amber-200 lg:shadow-sm`}
+        className={`
+          fixed top-0 left-0 h-screen bg-white flex flex-col gap-6
+          border-r border-gray-200 shadow-sm
+          transition-all duration-300 z-40
+          overflow-y-auto
+          ${isOpen ? "w-52 p-4" : "w-16 p-2"} 
+          lg:w-52 lg:p-6
+        `}
       >
         {/* Logo */}
+        <Link
+          href="/"
+          className="flex items-center justify-center lg:justify-start gap-2 mt-2"
+        >
+          <Image src="/logo.png" alt="logo" width={32} height={32} />
+          <span className="hidden lg:block font-semibold text-gray-700 text-base">
+            AcademiaPro
+          </span>
+        </Link>
 
-
-        {/* Menu */}
-        <nav className="flex flex-col gap-3 overflow-y-auto scrollbar-hide">
+        {/* Menu Section */}
+        <nav className="flex flex-col gap-4 mt-4">
           {menuItems.map((section) => (
             <div key={section.title}>
-              {(isOpen || typeof window !== "undefined") && (
-                <h3 className={`text-xs text-gray-500 font-semibold mb-2 tracking-wider ${!isOpen && "hidden lg:block"}`}>
-                  {section.title}
-                </h3>
-              )}
+              <h3
+                className={`text-[11px] uppercase text-gray-500 font-semibold mb-2 tracking-widest ${
+                  isOpen ? "block" : "hidden lg:block"
+                }`}
+              >
+                {section.title}
+              </h3>
+
               <div className="flex flex-col gap-1">
                 {section.items
                   .filter((item) => item.visible.includes(role))
@@ -73,18 +89,17 @@ const Menu = () => {
                     <Link
                       href={item.href}
                       key={item.label}
-                      className={`flex items-center gap-2 rounded-lg
-                        py-2 px-2
-                        transition-all
-                        hover:bg-amber-200 text-gray-800
+                      className={`
+                        flex items-center gap-3 rounded-lg py-2 px-2 text-sm font-medium
+                        transition-all duration-200 hover:bg-gray-100 hover:text-blue-600 text-gray-800
                         ${isOpen ? "justify-start" : "justify-center"}
-                        lg:justify-start lg:px-3 lg:w-full`}
+                        lg:justify-start lg:px-3 lg:w-full
+                      `}
                     >
                       <Image src={item.icon} alt={item.label} width={22} height={22} />
-                      {(isOpen || typeof window !== "undefined") && (
-                        <span className="hidden lg:inline text-sm font-medium">{item.label}</span>
-                      )}
-                      {isOpen && <span className="lg:hidden text-sm font-medium">{item.label}</span>}
+                      <span className={`${isOpen ? "inline" : "hidden lg:inline"}`}>
+                        {item.label}
+                      </span>
                     </Link>
                   ))}
               </div>
@@ -92,6 +107,28 @@ const Menu = () => {
           ))}
         </nav>
       </aside>
+
+      {/* Main content wrapper to prevent overlap */}
+      <div
+        className={`
+          transition-all duration-300
+          ${isOpen ? "ml-52" : "ml-16"}
+          lg:ml-52
+        `}
+      >
+        {/* Example Header Area */}
+        <header className="h-16 bg-white shadow-sm flex items-center px-6">
+          <h1 className="text-lg font-semibold text-gray-700">Dashboard Header</h1>
+        </header>
+
+        {/* Example Scrollable Content */}
+        <main className="p-6">
+          <p className="text-gray-600">
+            Your page content goes here. The sidebar will stay fixed, and this section
+            will scroll smoothly beside it.
+          </p>
+        </main>
+      </div>
     </>
   );
 };
